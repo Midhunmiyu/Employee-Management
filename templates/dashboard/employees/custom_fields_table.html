@@ -1,0 +1,33 @@
+<h5>{{employee.name}}'s Custom Fields</h5>
+<table class="table border-top table-bordered mb-0 table-hover">
+    <thead>
+        <tr>
+            <th>Sl No</th>
+            <th>Title</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if custom_fields %}
+        {% for d in custom_fields %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{d.field_title}}</td>
+            <td>{{d.field_value}}</td>
+            
+            <td>
+                <button class="btn btn-danger btn-sm mb-1" onclick="showCustomModal({{d.id}})"  ><i class="side-menu__icon fe fe-trash"  ></i></button>
+            </td>
+        </tr>
+        
+        {% endfor %}
+        {% else %}
+        <tr >
+            <td colspan='10'><center>No record found</center></td>
+        </tr>
+        {% endif %}
+
+
+    </tbody>
+</table>

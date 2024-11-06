@@ -1,0 +1,168 @@
+{% include 'dashboard/layout/header.html' %}
+{% load static %}
+
+<!--app-content open-->
+<div class="main-content app-content mt-0">
+    <div class="side-app">
+
+        <!-- CONTAINER -->
+        <div class="main-container container-fluid">
+
+            <!-- PAGE-HEADER -->
+            <div class="page-header">
+                <h1 class="page-title">Create Employee</h1>
+                <div>
+                    <a class="btn btn-primary" href="{% url 'employee:employees' %}"><i
+                            class="side-menu__icon fe fe-eye mx-1"></i>View
+                        All</a>
+                </div>
+            </div>
+            <!-- PAGE-HEADER END -->
+            <form method="post" enctype="multipart/form-data" id="myform" >
+                {% csrf_token %}
+                {% for message in messages %}
+                <div class="alert alert-primary alert-dismissible fade show m-0 text-center" id="success" role="alert"
+                    style="border-radius: 0;">
+                    {{message}}
+                    <button type="button" class="btn-close text-dark " data-bs-dismiss="alert" aria-label="Close">x</button>
+                </div>
+                {% endfor %}
+                <!-- ROW OPEN -->
+                <div class="row">
+
+  
+                    <div class="col-md-12 col-xl-12 col-12">
+                        <div class="card">
+
+                            <div class="card-body">
+
+                                <div class="row">
+                                    <div class="form-group col-lg-6">
+                                        <label for="" class="form-label"> Name <span style="color:red">*</span></label>
+                                        <input type="text" class="form-control" name="name" value="{{list.name}}"
+                                            required>
+                                    </div>
+                                    <div class="form-group col-lg-6">
+                                        <label for="" class="form-label"> Email <span style="color:red">*</span></label>
+                                        <input type="email" class="form-control" name="email" value="{{list.email}}"
+                                            {% if not list %}required{% else %}readonly{% endif %}>
+                                    </div>
+                                    <div class="form-group col-lg-6">
+                                        <label for="" class="form-label"> Position <span style="color:red">*</span></label>
+                                        <input type="text" class="form-control" name="position" value="{{list.position}}"
+                                            required>
+                                    </div>
+                                    {% if not list %}
+                                    <div class="form-group col-lg-6">
+                                        <label for="" class="form-label"> Password <span style="color:red">*</span></label>
+                                        <input type="password" class="form-control" name="pass" required>
+                                    </div>
+                                    <div class="form-group col-lg-6">
+                                        <label for="" class="form-label">Confirm Password <span style="color:red">*</span></label>
+                                        <input type="password" class="form-control" name="cpass" required>
+                                    </div>
+                                    {% endif %}
+                                    <h4>Custom Fields</h4>
+                                    <hr>
+                                    <br>
+                                    <div class="form-group col-lg-12 col-12">
+
+                                        <div class="form-group">
+                                            <div class="multi-field-wrapper ">
+                                                <div class="multi-fields">
+                                                    <div class="multi-field">
+                                                        <div class="row">
+                                                            <div class="col-lg-6" style="padding-right:0px">
+                                                                
+                                                                <div class="form-group">
+                                                                    <label>Field Title</label>
+                                                                    <input type="text" name="field_title[]"
+                                                                        class="form-control form-control-lg"
+                                                                        placeholder="" >
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-lg-6" style="padding-right:0px">
+                                                                <div class="form-group">
+                                                                    <label>Field Value</label>
+
+                                                                    <input class="form-control form-control-lg" 
+                                                                        name="field_value[]" maxlength="120">
+                                                                    
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <button type="button"
+                                                            class="remove-field float-right btn btn-danger btn-sm icon-btn ml-2 "><i
+                                                                class="mdi mdi-delete"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <button type="button" type="button"
+                                                        class=" add-field btn btn-info btn-sm icon-btn ml-2 mb-2">
+                                                        Add New<i class="mdi mdi-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {% if list %}
+                                                                {% for c in custom_fields %}
+                                                                <div class="multi-field" id="custom_id_{{c.id}}">
+                                                                    <div class="row">
+                                                                        <div class="col-lg-6"
+                                                                            style="padding-right: 0px">
+                                                                            <div class="form-group">
+                                                                                <label>Field Title</label>
+                                                                                <input type="text" name="field_title[]"
+                                                                                    id="field_title_{{ forloop.counter }}"
+                                                                                    class="form-control form-control-lg"
+                                                                                    placeholder=""
+                                                                                    value="{{ c.field_title }}">
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-lg-6"
+                                                                            style="padding-right: 0px">
+                                                                            <div class="form-group">
+                                                                                <label>Field Value</label>
+                                                                                <input type="text" name="field_value[]"
+                                                                                    id="field_value_{{ forloop.counter }}"
+                                                                                    class="form-control form-control-lg"
+                                                                                    placeholder="" 
+                                                                                     value="{{ c.field_value }}">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" id="delete_btn_{{ c.id }}"
+                                                                    class="delete-spec-btn btn btn-danger btn-sm icon-btn ml-2"><i class="mdi mdi-delete" onclick="deletefield({{ c.id }})"></i></button>
+                                                                {% endfor %}
+                                                                {% endif %}
+                                        </div>
+                                    </div>
+                                    
+
+
+
+                                    <div class="form-group col-lg-12 col-3">
+                                        <button type="submit" class="btn btn-primary mt-4 mb-0" id="submitButton">Submit</button>
+                                        <a href="{% url 'employee:employees' %}" class="btn btn-danger mt-4 mb-0">Cancel</a>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- ROW CLOSED -->
+
+
+
+                    </div>
+                    <!-- CONTAINER END -->
+                </div>
+            </form>
+        </div>
+    </div>
+    <!--app-content close-->
+
+    {% include 'dashboard/layout/footer.html' %}

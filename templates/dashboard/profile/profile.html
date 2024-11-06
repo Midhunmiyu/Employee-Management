@@ -1,0 +1,77 @@
+{% include 'dashboard/layout/header.html' %}
+{% load static %}
+
+
+
+<!--app-content open-->
+
+<div class="main-content app-content mt-0">
+
+    <div class="side-app">
+
+
+
+        <!-- CONTAINER -->
+
+        <div class="main-container container-fluid">
+
+
+
+            <!-- PAGE-HEADER -->
+
+            <div class="page-header">
+                <h3 class="card-title">Employee Details</h3>
+            </div>
+
+          
+
+            <div class="row">
+
+
+
+                <div class="col-xl-8 col-lg-8">
+
+                    <div class="card">
+
+                        <div class="card-body">
+
+                            <h6 >Employee Name : {{employee.name}}</h6>
+                            <h6 >Employee Email : {{employee.email}}</h6>
+                            <h6 >Employee Position : {{employee.position}}</h6>
+                            {% if custom_fields %}
+                            {% for c in custom_fields %}
+                            <h6>{{c.field_title}} : {{c.field_value}}</h6>
+                            {% endfor %}
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+
+
+
+
+            </div>
+
+        </div>
+
+        <!-- ROW-1 CLOSED -->
+
+    </div>
+
+    <!-- CONTAINER END -->
+
+</div>
+
+</div>
+
+<!--app-content close-->
+
+
+
+{% include 'dashboard/layout/footer.html' %}
