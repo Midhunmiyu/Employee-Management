@@ -33,8 +33,8 @@ class EmployeeManager(BaseUserManager):
 
 class Employee(AbstractBaseUser):
     email = models.EmailField(verbose_name='email address',max_length=255,unique=True)
-    name = models.CharField(max_length=200)
-    position = models.CharField(max_length=100)
+    name = models.CharField(max_length=200,null=True,blank=True)
+    position = models.CharField(max_length=100,null=True,blank=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
