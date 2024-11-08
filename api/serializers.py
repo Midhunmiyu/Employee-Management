@@ -30,6 +30,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         position = data.get('position')
         if not email:
             raise serializers.ValidationError("Email is required")
+
         try:
             validate_email(email)
         except ValidationError:
@@ -106,3 +107,65 @@ class EmployeeEditSerializer(serializers.ModelSerializer):
                 if field_title.strip() and field_value.strip():
                     EmployeeCustomField.objects.create(employee=instance, field_title=field_title, field_value=field_value)
         return instance
+    
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    current_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+    class Meta:
+        model = Employee
+        fields = ['current_password', 'new_password', 'confirm_password']
+
+    def validate(self,data):
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        confirm_password = data.get('confirm_password')
+        if not current_password:
+            raise serializers.ValidationError("Current password is required")
+        if not new_password:
+            raise serializers.ValidationError("New password is required")
+        if not confirm_password:
+            raise serializers.ValidationError("Confirm password is required")
+        if new_password != confirm_password:
+            raise serializers.ValidationError("New password and confirm password does not match")
+        return data
+    
+    def update(self, instance, validated_data):
+        new_password = validated_data.get('new_password')
+        instance.set_password(new_password)
+        instance.save()
+        return instance
+    
+class ProfileEditSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False)
+    position = serializers.CharField(required=False)
+    class Meta:
+        model = Employee
+        fields = ['name', 'position']
+
+    def validate(self,data):
+        name = data.get('name',None)
+        position = data.get('position',None)
+        if name and name.strip() == '':
+            raise serializers.ValidationError("Name cannot be empty")
+        if position and position.strip() == '':
+            raise serializers.ValidationError("Position cannot be empty")
+        return data
+    
+    def update(self,instance,validated_data):
+        name = validated_data.get('name',None)
+        position = validated_data.get('position',None)
+        if name is not None:
+            instance.name = name
+        if position is not None:
+            instance.position = position
+        instance.save()
+        return instance
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['email'] = instance.email
+        representation['name'] = instance.name
+        representation['position'] = instance.position
+        representation['custom_fields'] = EmployeeCustomFieldSerializer(instance.custom_fields, many=True).data
+        return representation

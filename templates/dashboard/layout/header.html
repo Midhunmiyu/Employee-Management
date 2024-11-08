@@ -67,7 +67,7 @@
                   </div>
                   <div class="dropdown-divider m-0"></div>
                   <a class="dropdown-item" href="{% url 'employee:change_password' %}">
-                    <i class="dropdown-icon fe fe-user"></i> Change Password </a>
+                    <i class="dropdown-icon fe fe-lock"></i> Change Password </a>
                   <a class="dropdown-item" href="{% url 'employee:logout' %}">
                     <i class="dropdown-icon fe fe-alert-circle"></i> Sign out </a>
                 </div>
@@ -106,14 +106,16 @@
                   <span class="side-menu__label">Dashboard</span>
                 </a>
               </li>
+              {% if not request.user.is_admin %}
               <li class="slide ">
                 <a class="side-menu__item has-link" data-bs-toggle="slide" href="{% url 'employee:profile' %}">
-                  <i class="side-menu__icon fa fa-navicon"></i><span class="side-menu__label">Profile</span></a>
+                  <i class="side-menu__icon fa fa-user"></i><span class="side-menu__label">Profile</span></a>
               </li>
+              {% endif %}
               {% if request.user.is_admin %}
               <li class="slide ">
                 <a class="side-menu__item has-link" data-bs-toggle="slide" href="{% url 'employee:employees' %}">
-                  <i class="side-menu__icon fa fa-navicon"></i><span class="side-menu__label">Employees</span></a>
+                  <i class="dropdown-icon fe fe-users"></i><span class="side-menu__label">Employees</span></a>
               </li>
               {% endif %}
             

@@ -66,8 +66,9 @@
                                     <hr>
                                     <br>
                                     <div class="form-group col-lg-12 col-12">
-
+                                        
                                         <div class="form-group">
+                                            {% if request.user.is_admin %}
                                             <div class="multi-field-wrapper ">
                                                 <div class="multi-fields">
                                                     <div class="multi-field">
@@ -105,6 +106,7 @@
                                                     </button>
                                                 </div>
                                             </div>
+                                            {% endif %}
                                             {% if list %}
                                                                 {% for c in custom_fields %}
                                                                 <div class="multi-field" id="custom_id_{{c.id}}">
@@ -117,7 +119,7 @@
                                                                                     id="field_title_{{ forloop.counter }}"
                                                                                     class="form-control form-control-lg"
                                                                                     placeholder=""
-                                                                                    value="{{ c.field_title }}">
+                                                                                    value="{{ c.field_title }}" {% if not request.user.is_admin %}readonly{% endif %}>
                                                                             </div>
                                                                         </div>
 
@@ -129,13 +131,15 @@
                                                                                     id="field_value_{{ forloop.counter }}"
                                                                                     class="form-control form-control-lg"
                                                                                     placeholder="" 
-                                                                                     value="{{ c.field_value }}">
+                                                                                     value="{{ c.field_value }}" {% if not request.user.is_admin %}readonly{% endif %}>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                {% if request.user.is_admin %}
                                                                 <button type="button" id="delete_btn_{{ c.id }}"
                                                                     class="delete-spec-btn btn btn-danger btn-sm icon-btn ml-2"><i class="mdi mdi-delete" onclick="deletefield({{ c.id }})"></i></button>
+                                                                {% endif %}
                                                                 {% endfor %}
                                                                 {% endif %}
                                         </div>

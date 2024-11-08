@@ -126,8 +126,11 @@ class ChangePasswordView(TemplateView):
             return redirect('employee:change_password')
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class ProfileView(TemplateView):
+class ProfileView(UserPassesTestMixin,TemplateView):
     template_name = 'dashboard/profile/profile.html'
+
+    def test_func(self):
+        return not self.request.user.is_admin
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -293,11 +296,8 @@ class DeleteCustomFiledsView(TemplateView):
 
 
 @method_decorator(login_required(login_url='/login/'),name='dispatch')
-class EmployeeUpdateView(UserPassesTestMixin,TemplateView):
+class EmployeeUpdateView(TemplateView):
     template_name = 'dashboard/employees/employee_create.html'
-
-    def test_func(self):
-        return self.request.user.is_admin
 
     def get(self, request, id):
         data = Employee.objects.get(pk=id)
@@ -316,16 +316,20 @@ class EmployeeUpdateView(UserPassesTestMixin,TemplateView):
         data.email = email
         data.position = position
         data.save()
-        existing_custom_fields = EmployeeCustomField.objects.filter(employee=data)
-        existing_custom_fields.delete()
         if field_title and field_value:
+            existing_custom_fields = EmployeeCustomField.objects.filter(employee=data)
+            existing_custom_fields.delete()
             for title, value in zip(field_title, field_value):
                 if title.strip() and value.strip(): 
                     custom_field = EmployeeCustomField(employee=data, field_title=title.strip(), field_value=value.strip())
                     custom_field.save()
 
-        messages.success(request, "Employee updated successfully")
-        return redirect('employee:employees')
+        if request.user.is_admin:
+            messages.success(request, "Employee updated successfully")
+            return redirect('employee:employees')
+        else:
+            messages.success(request, "Profile updated successfully")
+            return redirect('employee:profile')
     
 
 class DeleteFieldView(View):
