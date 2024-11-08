@@ -11,7 +11,7 @@ source venv/Scripts/activate
 ```bash
 git clone https://github.com/Midhunmiyu/Employee-Management.git
 
-cd Employee_Management/
+cd Employee-Management/
 ```
 
 ## 3.Installation
