@@ -30,13 +30,16 @@ class EmployeeSerializer(serializers.ModelSerializer):
         position = data.get('position')
         if not email:
             raise serializers.ValidationError("Email is required")
-
         try:
             validate_email(email)
         except ValidationError:
             raise serializers.ValidationError("Invalid email")
         if not name:
             raise serializers.ValidationError("Name is required")
+        if name and not name[0].isalpha():
+            raise serializers.ValidationError("Name must start with an alphabetic character")
+        if name and not all(x.isalpha() or x.isspace() or x == '.' for x in name):
+            raise serializers.ValidationError("Name should contain only alphabetic characters, spaces, and periods")
         if not position:
             raise serializers.ValidationError("Position is required")
         if not password:
@@ -83,6 +86,10 @@ class EmployeeEditSerializer(serializers.ModelSerializer):
         position = data.get('position',None)
         if name and name.strip() == '':
             raise serializers.ValidationError("Name cannot be empty")
+        if name and not name[0].isalpha():
+            raise serializers.ValidationError("Name must start with an alphabetic character")
+        if name and not all(x.isalpha() or x.isspace() or x == '.' for x in name):
+            raise serializers.ValidationError("Name should contain only alphabetic characters, spaces, and .")
         if email and self.instance.email != email:
             raise serializers.ValidationError("Email cannot be changed")
         if position and position.strip() == '':
@@ -148,6 +155,10 @@ class ProfileEditSerializer(serializers.ModelSerializer):
         position = data.get('position',None)
         if name and name.strip() == '':
             raise serializers.ValidationError("Name cannot be empty")
+        if name and not name[0].isalpha():
+            raise serializers.ValidationError("Name must start with an alphabetic character")
+        if name and not all(x.isalpha() or x.isspace() or x == '.' for x in name):
+            raise serializers.ValidationError("Name should contain only alphabetic characters, spaces, and periods")
         if position and position.strip() == '':
             raise serializers.ValidationError("Position cannot be empty")
         return data

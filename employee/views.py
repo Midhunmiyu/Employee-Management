@@ -17,7 +17,7 @@ from django.template import loader
 from django.contrib.auth.mixins import UserPassesTestMixin
 
 
-
+#login
 class LoginView(TemplateView):
     template_name = 'dashboard/login/login.html'
 
@@ -42,7 +42,8 @@ class LoginView(TemplateView):
             messages.error(request, 'Invalid Credentials')
             return redirect('employee:login')
 
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+#logout
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class LogoutView(TemplateView):
     template_name = 'dashboard/login/login.html'
 
@@ -50,6 +51,7 @@ class LogoutView(TemplateView):
         logout(request)
         return redirect('employee:login')
 
+#registration
 class RegisterView(TemplateView):
     template_name = 'dashboard/register/register.html'
 
@@ -64,6 +66,19 @@ class RegisterView(TemplateView):
             validate_email(email)
         except ValidationError as e:
             messages.error(request, "Invalid email..Please try again..!!")
+            return redirect('employee:register')
+        
+        if name and name.strip() == '':
+            messages.error(request, "Name cannot be empty")
+            return redirect('employee:register')
+        if name and not name[0].isalpha():
+            messages.error(request, "Name must start with an alphabetic character")
+            return redirect('employee:register')
+        if name and not all(x.isalpha() or x.isspace() or x == '.' for x in name):
+            messages.error(request, "Name should contain only alphabetic characters, spaces, and .")
+            return redirect('employee:register')
+        if position and position.strip() == '':
+            messages.error(request, "Position cannot be empty")
             return redirect('employee:register')
         
         if email and name and position and password and confirm_password:
@@ -89,7 +104,7 @@ class RegisterView(TemplateView):
             return redirect('employee:register')
         
         
-
+#email availability checking
 class CheckEmailAvailability(View):
     def get(self, request, *args, **kwargs):
         email = self.request.GET.get('email')
@@ -97,12 +112,19 @@ class CheckEmailAvailability(View):
             return JsonResponse({'status':False, 'message':'Email is not available'},status=200)
         return JsonResponse({'status':True, 'message':'Email is available'},status=200)
         
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+#index
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class IndexView(TemplateView):
     template_name = 'dashboard/index/index.html'
 
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        employee = Employee.objects.all().count()
+        context['employee'] = employee
+        return context
+
+#changing password
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class ChangePasswordView(TemplateView):
     template_name = 'dashboard/profile/change_password.html'
     def get(self,request):
@@ -125,7 +147,8 @@ class ChangePasswordView(TemplateView):
             messages.success(request, 'Your password has been changed successfully.')
             return redirect('employee:change_password')
 
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+#profile (not for admin)
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class ProfileView(UserPassesTestMixin,TemplateView):
     template_name = 'dashboard/profile/profile.html'
 
@@ -140,8 +163,8 @@ class ProfileView(UserPassesTestMixin,TemplateView):
         context['custom_fields'] = custom_fields
         return context
     
-
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+#employee section (only or admin)
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class EmployeeListView(UserPassesTestMixin,TemplateView):
     template_name = 'dashboard/employees/employee_list.html'
 
@@ -206,7 +229,7 @@ class EmployeeListView(UserPassesTestMixin,TemplateView):
         return renderhelper(request, 'employees', 'employee_view', context)
     
 
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class EmployeeCreateView(UserPassesTestMixin,TemplateView):
     template_name = 'dashboard/employees/employee_create.html'
 
@@ -274,6 +297,7 @@ class ShowCustomFiledsView(TemplateView):
         except Employee.DoesNotExist:
             return JsonResponse({'status': False, 'message': 'Employee not found'},status=404)
 
+#deleting custom fields form listing section
 class DeleteCustomFiledsView(TemplateView):
     template_name = 'dashboard/employees/custom_fields_table.html'
     def get(self,request):
@@ -295,7 +319,7 @@ class DeleteCustomFiledsView(TemplateView):
             return JsonResponse({'status': False, 'message': 'Field not found'},status=404)
 
 
-@method_decorator(login_required(login_url='/login/'),name='dispatch')
+@method_decorator(login_required(login_url='/'),name='dispatch')
 class EmployeeUpdateView(TemplateView):
     template_name = 'dashboard/employees/employee_create.html'
 
@@ -331,7 +355,7 @@ class EmployeeUpdateView(TemplateView):
             messages.success(request, "Profile updated successfully")
             return redirect('employee:profile')
     
-
+#delete field while updation
 class DeleteFieldView(View):
     def get(self,request):
         id = request.GET.get('id')

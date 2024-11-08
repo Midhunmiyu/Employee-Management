@@ -9,10 +9,15 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from api.pagination import CustomPagination
 from api.renderers import UserRenderer
+from api.permissions import IsNotAdminUser
+from api.throttles import CustomUserRateThrottle,CustomAnonRateThrottle
+from django.db.models import Q
 
 
+#Registration
 class RegisterViewSet(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [CustomAnonRateThrottle]
 
     def post(self, request):
         data = request.data
@@ -25,9 +30,10 @@ class RegisterViewSet(APIView):
         except Exception as e:
             return Response({'status': 'error','message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-
+#login
 class LoginViewSet(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [CustomAnonRateThrottle]
 
     def post(self, request):
         email = request.data.get('email')
@@ -46,10 +52,11 @@ class LoginViewSet(APIView):
         except Exception as e:
             return Response({'status': 'error','message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-
+#logout
 class LogoutViewSet(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+    throttle_classes = [CustomUserRateThrottle]
 
     def post(self, request):
         try:
@@ -59,11 +66,13 @@ class LogoutViewSet(APIView):
             return Response({'status': 'success','message': 'Logout successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'status': 'error','message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+#reset password       
 class ResetPasswordViewSet(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+    throttle_classes = [CustomUserRateThrottle]
 
     def post(self,request):
         try:
@@ -77,11 +86,12 @@ class ResetPasswordViewSet(APIView):
         except Exception as e :
             return Response({'status': 'error','message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-
+#employee
 class EmployeeViewSet(APIView):
     renderer_classes = [UserRenderer]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
+    throttle_classes = [CustomUserRateThrottle]
 
     def get(self, request):
         try:
@@ -153,11 +163,13 @@ class EmployeeViewSet(APIView):
                 return Response({'status': 'error', 'message': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+#delete employee custom field        
 class DeleteEmployeeCustomField(APIView):
     renderer_classes = [UserRenderer]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
+    throttle_classes = [CustomUserRateThrottle]
 
     def delete(self,request):
         try:
@@ -170,11 +182,13 @@ class DeleteEmployeeCustomField(APIView):
                 return Response({'status': 'error', 'message': 'Field not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+#employee profile      
 class EmployeeProfileViewSet(APIView):
     renderer_classes = [UserRenderer]
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsNotAdminUser]
+    throttle_classes = [CustomUserRateThrottle]
 
     def get(self, request):
         try:
@@ -193,5 +207,33 @@ class EmployeeProfileViewSet(APIView):
                 serializer.save()
                 return Response({'status': 'success', 'message': 'Profile updated successfully', 'data': serializer.data}, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class SearchEmployeeView(APIView):
+    renderer_classes = [UserRenderer]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    throttle_classes = [CustomUserRateThrottle]
+
+    def get(self, request):
+        try:
+            query = request.query_params.get('q')
+            if query:
+                employees = Employee.objects.filter(Q(name__icontains=query) | Q(email__icontains=query)).order_by('-id')
+                paginator = CustomPagination()
+                paginated_data = paginator.paginate_queryset(employees, request)
+                serializer = EmployeeSerializer(paginated_data, many=True)
+                response_data = {
+                    'status':'succes',
+                    'message': 'Employees retrieved successfully',
+                    'data': serializer.data,
+                    'count':paginator.page.paginator.count,
+                    'next':paginator.get_next_link(),
+                    'previous':paginator.get_previous_link()
+
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
+            return Response({'status': 'error', 'message': 'Query parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

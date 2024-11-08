@@ -118,3 +118,16 @@ function deletefield(id) {
     });
     
 }
+
+
+//restricting submit button
+
+document.getElementById("myform").addEventListener("submit", function (event) {
+    // Disable the submit button when the form is submitted
+    document.getElementById("submitButton").disabled = true;
+
+    setTimeout(function () {
+
+        document.getElementById("submitButton").disabled = false;
+    }, 3000);
+});

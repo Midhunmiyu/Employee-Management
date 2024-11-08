@@ -13,4 +13,6 @@ urlpatterns = [
     path('employee/',EmployeeViewSet.as_view(),name='employee'),
     path('delete-employee-custom-field/',DeleteEmployeeCustomField.as_view(),name='delete_employee_custom_field'),
     path('profile/',EmployeeProfileViewSet.as_view(),name='employee_profile'),
+
+    path('search-employee/',SearchEmployeeView.as_view(),name='search_employee'),
 ]
